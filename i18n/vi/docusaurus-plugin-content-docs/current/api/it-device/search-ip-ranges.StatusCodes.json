@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"rangeName":{"type":"string"},"startIp":{"type":"string"},"endIp":{"type":"string"}},"title":"IpRangeResponseDTO"}}}}}}}

@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"empNum":{"type":"string"},"fullName":{"type":"string"},"departmentName":{"type":"string"}},"title":"EmployeeResponseDTO"}}}}}}}

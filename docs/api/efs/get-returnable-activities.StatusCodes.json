@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"participantId":{"type":"integer","format":"int32"},"activityDefinitionId":{"type":"string"},"activityName":{"type":"string"},"performerName":{"type":"string"},"completedTime":{"type":"string"}},"title":"UserReturnableActivityDTO"}}}}}}}

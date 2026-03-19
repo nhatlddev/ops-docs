@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"page":{"type":"integer","format":"int32"},"limit":{"type":"integer","format":"int32"},"sortBy":{"type":"string"},"currentUserId":{"type":"string"},"createdAtFrom":{"type":"string"},"createdAtTo":{"type":"string"}},"title":"UserProcessDraftFilterDTO"}}},"required":true}}

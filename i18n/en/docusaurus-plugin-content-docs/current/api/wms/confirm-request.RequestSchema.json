@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"required":["scannedDestinationLocationId"],"type":"object","properties":{"requestCode":{"type":"string"},"scannedDestinationLocationId":{"type":"integer","format":"int32"}},"title":"AdminTransferLocationConfirmByScanDTO"}}},"required":true}}

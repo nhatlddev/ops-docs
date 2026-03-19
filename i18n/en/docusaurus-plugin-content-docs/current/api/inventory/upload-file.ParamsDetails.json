@@ -1,0 +1,1 @@
+{"parameters":[{"name":"Folder","in":"query","required":true,"schema":{"type":"string","enum":["PRODUCT_FOLDER"]}}]}

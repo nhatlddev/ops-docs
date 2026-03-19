@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"required":["branchId","fieldName","fieldValue"],"type":"object","properties":{"printerId":{"type":"string"},"fieldName":{"type":"string"},"fieldValue":{"type":"string"},"branchId":{"type":"string"},"connections":{"type":"string"}},"title":"AdminPrinterValidationRequestDTO"}}},"required":true}}

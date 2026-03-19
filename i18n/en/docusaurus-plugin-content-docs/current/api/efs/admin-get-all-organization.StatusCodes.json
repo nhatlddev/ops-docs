@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"code":{"type":"string"},"name":{"type":"string"}},"title":"AdminOrganizationResponseDTO"}}}}}}}

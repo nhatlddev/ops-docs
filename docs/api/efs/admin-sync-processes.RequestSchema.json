@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"options":{"type":"array","items":{"type":"string"}},"processCode":{"type":"string"},"processVersion":{"type":"integer","format":"int32"},"formVersion":{"type":"integer","format":"int32"}},"title":"AdminSyncRequestDTO"}}},"required":true}}

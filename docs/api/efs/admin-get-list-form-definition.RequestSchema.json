@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"categoryId":{"type":"integer","format":"int32"},"getBy":{"type":"string"},"code":{"type":"string"},"type":{"type":"string"}},"title":"AdminFormDefinitionFilterDTO"}}},"required":true}}

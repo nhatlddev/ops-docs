@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"unitCode":{"type":"string"},"page":{"type":"integer","format":"int32"},"limit":{"type":"integer","format":"int32"},"sortBy":{"type":"string"},"unitId":{"type":"integer","format":"int32"}},"title":"AdminUserPositionFilterDTO"}}},"required":true}}

@@ -1,0 +1,1 @@
+{"parameters":[{"name":"processInstanceId","in":"path","required":true,"schema":{"type":"integer","format":"int32"}},{"name":"workItemId","in":"path","required":true,"schema":{"type":"integer","format":"int32"}}]}

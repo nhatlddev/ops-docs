@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"content":{"type":"string"},"pageKey":{"type":"string"},"pageTitle":{"type":"string"}},"title":"AdminInfoRequestDTO"}}},"required":true}}

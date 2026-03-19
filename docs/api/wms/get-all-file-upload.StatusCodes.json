@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"parallel":{"type":"boolean"}}}}}}}}

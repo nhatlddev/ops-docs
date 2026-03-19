@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"totalComputers":{"type":"integer","format":"int64"},"totalPrinters":{"type":"integer","format":"int64"},"totalDepartments":{"type":"integer","format":"int64"},"totalEmployees":{"type":"integer","format":"int64"}},"title":"AdminDashboardStatsResponseDTO"}}}}}}

@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"rangeName":{"type":"string"},"startIp":{"type":"string"},"endIp":{"type":"string"},"branchId":{"type":"string"},"branchName":{"type":"string"}},"title":"AdminIpRangeResponseDTO"}}}}}}

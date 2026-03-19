@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"draftId":{"type":"integer","format":"int32"},"workflowPackageId":{"type":"integer","format":"int32"},"formValues":{"type":"object","additionalProperties":{"type":"object"}}},"title":"UserProcessDraftRequestDTO"}}},"required":true}}

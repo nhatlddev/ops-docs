@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"userId":{"type":"string"},"lang":{"type":"string"}},"title":"UserLocalNoticeWorkItemFilterDTO"}}},"required":true}}

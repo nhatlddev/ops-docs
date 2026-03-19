@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"reportId":{"type":"integer","format":"int32"},"type":{"type":"string"},"generatedDate":{"type":"string"},"data":{"type":"string"},"createdAt":{"type":"string"},"createdBy":{"type":"string"}},"title":"AdminReportDetailResponseDTO"}}}}}}

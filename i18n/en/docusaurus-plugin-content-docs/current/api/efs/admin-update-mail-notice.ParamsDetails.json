@@ -1,0 +1,1 @@
+{"parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}},{"name":"notice","in":"query","required":true,"schema":{"type":"boolean"}}]}

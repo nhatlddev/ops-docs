@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"departmentCode":{"type":"string"},"departmentName":{"type":"string"},"branchId":{"type":"string"},"sort":{"type":"integer","format":"int32"},"deleted":{"type":"boolean"}},"title":"AdminDepartmentRequestDTO"}}},"required":true}}

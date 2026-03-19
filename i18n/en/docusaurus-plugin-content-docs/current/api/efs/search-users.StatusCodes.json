@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"userId":{"type":"string"},"username":{"type":"string"},"rowNum":{"type":"integer","format":"int32"},"positionNames":{"type":"string"}},"title":"UserResponseDTO"}}}}}}}

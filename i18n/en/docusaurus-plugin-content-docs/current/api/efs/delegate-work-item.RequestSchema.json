@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"required":["comment"],"type":"object","properties":{"workItemId":{"type":"integer","format":"int32"},"targetUserId":{"type":"string"},"comment":{"type":"string"}},"title":"UserDelegateWorkItemRequestDTO"}}},"required":true}}

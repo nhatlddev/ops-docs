@@ -1,0 +1,1 @@
+{"parameters":[{"name":"sku","in":"path","required":true,"schema":{"type":"string"}},{"name":"locationId","in":"path","required":true,"schema":{"type":"integer","format":"int32"}},{"name":"warehouseId","in":"path","required":true,"schema":{"type":"integer","format":"int32"}}]}

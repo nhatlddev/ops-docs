@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"groupId":{"type":"integer","format":"int32"},"id":{"type":"integer","format":"int32"},"userId":{"type":"string"},"username":{"type":"string"},"rowNum":{"type":"integer","format":"int32"},"orgCode":{"type":"string"}},"title":"AdminGroupUserResponseDTO"}}}}}}

@@ -1,0 +1,1 @@
+{"parameters":[{"name":"branchId","in":"path","required":true,"schema":{"type":"string"}}]}

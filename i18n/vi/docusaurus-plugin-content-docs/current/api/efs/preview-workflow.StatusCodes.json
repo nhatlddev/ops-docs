@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"activityId":{"type":"string"},"activityName":{"type":"string"},"type":{"type":"string"},"performerNames":{"type":"array","items":{"type":"string"}},"description":{"type":"string"}},"title":"UserWorkflowReviewResponseDTO"}}}}}}}

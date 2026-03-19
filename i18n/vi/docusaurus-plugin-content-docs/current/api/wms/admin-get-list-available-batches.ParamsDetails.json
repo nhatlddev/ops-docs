@@ -1,0 +1,1 @@
+{"parameters":[{"name":"sku","in":"path","required":true,"schema":{"type":"string"}},{"name":"warehouseId","in":"path","required":true,"schema":{"type":"integer","format":"int32"}}]}

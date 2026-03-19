@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"id":{"type":"integer","format":"int32"},"zone":{"type":"string"},"rack":{"type":"string"},"shelf":{"type":"string"},"bin":{"type":"string"},"isDefault":{"type":"boolean"}},"title":"LocationResponseDTO"}}}}}}}

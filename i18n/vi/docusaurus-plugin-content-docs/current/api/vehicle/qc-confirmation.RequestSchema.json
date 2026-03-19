@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"inspectionName":{"type":"string"},"orderCode":{"type":"string"},"pass":{"type":"boolean"},"result":{"type":"string"}},"title":"InspectionRequestDTO"}}},"required":true}}

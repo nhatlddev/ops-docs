@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"departmentCode":{"type":"string"},"departmentName":{"type":"string"},"branchId":{"type":"string"},"printerCount":{"type":"integer","format":"int64"}},"title":"AdminPrinterCountDTO"}}}}}}}

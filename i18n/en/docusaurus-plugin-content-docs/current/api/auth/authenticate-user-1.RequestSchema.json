@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"required":["password","userId"],"type":"object","properties":{"userId":{"type":"string"},"password":{"type":"string"},"module":{"type":"string"}},"title":"SignInDTO"}}},"required":true}}

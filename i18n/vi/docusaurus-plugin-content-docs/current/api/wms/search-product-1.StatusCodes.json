@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"productId":{"type":"integer","format":"int32"},"name":{"type":"string"},"sku":{"type":"string"}},"title":"ProductResponseDTO"}}}}}}}

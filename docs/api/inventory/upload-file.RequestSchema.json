@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"required":["arg0"],"type":"object","properties":{"arg0":{"type":"string","format":"binary"}}}}}}}

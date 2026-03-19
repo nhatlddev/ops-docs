@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"required":["content"],"type":"object","properties":{"workItemId":{"type":"integer","format":"int32"},"recipientIds":{"type":"array","items":{"type":"string"}},"content":{"type":"string"},"noticeType":{"type":"integer","format":"int32"}},"title":"UserSendNotificationRequestDTO"}}},"required":true}}

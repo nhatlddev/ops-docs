@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"processInstanceId":{"type":"integer","format":"int32"},"formValues":{"type":"object","additionalProperties":{"type":"object"}}},"title":"UserTimelineRequestDTO"}}},"required":true}}

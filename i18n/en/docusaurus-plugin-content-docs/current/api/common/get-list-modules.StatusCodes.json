@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"roleId":{"type":"string"},"icon":{"type":"string"}},"title":"ModuleResponseDTO"}}}}}}}

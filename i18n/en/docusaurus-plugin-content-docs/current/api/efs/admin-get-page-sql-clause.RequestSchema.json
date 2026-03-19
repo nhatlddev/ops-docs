@@ -1,0 +1,1 @@
+{"title":"Body","body":{"content":{"application/json":{"schema":{"type":"object","properties":{"sqlId":{"type":"string"},"sqlName":{"type":"string"},"dataAccess":{"type":"string"},"page":{"type":"integer","format":"int32"},"limit":{"type":"integer","format":"int32"},"sortBy":{"type":"string"},"formCode":{"type":"string"}},"title":"AdminSqlClauseFilterDTO"}}},"required":true}}

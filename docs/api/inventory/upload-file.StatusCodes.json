@@ -1,0 +1,1 @@
+{"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object","properties":{"url":{"type":"string"},"fileName":{"type":"string"}},"title":"WarehouseFileUploadResponseDTO"}}}}}}
