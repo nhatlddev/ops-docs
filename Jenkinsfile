@@ -58,17 +58,18 @@ pipeline {
                         else { \$tag = \$rawBranch }
                         if (\$null -eq \$tag -or \$tag -eq "") { \$tag = "latest" }
 
-                        \$localPath = (Get-Location).Path + "/\$keyFile"
-                        \$containerPath = "/ssh_key"
-                        \$volumeBind = "\${localPath}:\${containerPath}"
+                        \$currentDir = (Get-Location).Path
+                        \$localPath = "\${currentDir}/\$keyFile"
 
                         docker run --rm `
-                            -v "\$volumeBind" `
+                            -v "\${localPath}:/tmp/ssh_key_mount:ro" `
                             alpine:latest `
                             sh -c "apk add --no-cache openssh-client && \
+                                   cp /tmp/ssh_key_mount /tmp/ssh_key && \
+                                   chmod 600 /tmp/ssh_key && \
                                    mkdir -p ~/.ssh && \
                                    ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
-                                   ssh -i /ssh_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
+                                   ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
                                    cd ${env.WORK_DIR} && \
                                    export IMAGE_TAG=\$tag && \
                                    docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
