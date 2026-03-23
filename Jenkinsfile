@@ -2,13 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = "123456nhat"
         DOCKER_IMAGE = "123456nhat/ops-docs" 
         COMPOSE_FILE = "docker-compose-docs.yml"
-        
-        DOCKER_HUB = credentials('docker-hub-creds') 
-        SSH_PRIVATE_KEY = credentials('ssh-private-key')
-        
         SSH_HOST = "172.16.1.122"
         SSH_USER = "Admin"
         WORK_DIR = "C:\\project"
@@ -27,46 +22,51 @@ pipeline {
 
         stage('Build') {
             steps {
-                powershell """
-                    \$env:DOCKER_HUB_PSW | docker login -u \$env:DOCKER_HUB_USR --password-stdin
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
+                    powershell """
+                        echo "\$env:DOCK_PASS" | docker login -u "\$env:DOCK_USER" --password-stdin
 
-                    npm install --frozen-lockfile
-                    \$env:NODE_OPTIONS="--max-old-space-size=4096"
-                    npm run build
+                        npm install --frozen-lockfile
+                        \$env:NODE_OPTIONS="--max-old-space-size=4096"
+                        npm run build
 
-                    \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
-                    
-                    docker build -t "${env.DOCKER_IMAGE}:\$TAG" .
-                    docker push "${env.DOCKER_IMAGE}:\$TAG"
-                    
-                    docker logout
-                """
+                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
+                        
+                        docker build -t "${env.DOCKER_IMAGE}:\$TAG" .
+                        docker push "${env.DOCKER_IMAGE}:\$TAG"
+                        
+                        docker logout
+                    """
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                powershell """
-                    \$keyFile = "ssh_key_temp"
-                    [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${env.SSH_PRIVATE_KEY}")))
-                    
-                    \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
+                withCredentials([string(credentialsId: 'ssh-private-key', variable: 'SSH_KEY'), 
+                                 usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
+                    powershell """
+                        \$keyFile = "ssh_key_temp"
+                        [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("\$env:SSH_KEY")))
+                        
+                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
 
-                    docker run --rm `
-                        -v "\${env:WORKSPACE}/\$keyFile:/ssh_key" `
-                        alpine:latest `
-                        sh -c "apk add --no-cache openssh-client && \
-                               chmod 600 /ssh_key && \
-                               mkdir -p ~/.ssh && \
-                               ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
-                               ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'echo ${env.DOCKER_HUB_PSW} | docker login -u ${env.DOCKER_HUB_USR} --password-stdin && \
-                               cd ${env.WORK_DIR} && \
-                               export IMAGE_TAG=\$TAG && \
-                               docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
-                               docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
-                    
-                    Remove-Item \$keyFile -Force
-                """
+                        docker run --rm `
+                            -v "\${env:WORKSPACE}/\$keyFile:/ssh_key" `
+                            alpine:latest `
+                            sh -c "apk add --no-cache openssh-client && \
+                                   chmod 600 /ssh_key && \
+                                   mkdir -p ~/.ssh && \
+                                   ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
+                                   ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'echo \$DOCK_PASS | docker login -u \$DOCK_USER --password-stdin && \
+                                   cd ${env.WORK_DIR} && \
+                                   export IMAGE_TAG=\$TAG && \
+                                   docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
+                                   docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
+                        
+                        Remove-Item \$keyFile -Force
+                    """
+                }
             }
         }
     }
