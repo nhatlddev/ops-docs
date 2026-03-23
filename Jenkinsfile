@@ -20,24 +20,33 @@ pipeline {
             }
         }
 
-        
+       
 
         stage('Deploy') {
             steps {
                 withCredentials([string(credentialsId: 'ssh-private-key', variable: 'SSH_KEY'), 
                                  usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
                     powershell """
-                        \$rawBranch = "${env.GIT_BRANCH}"
-                        if (\$rawBranch -match "/") { \$tag = \$rawBranch.Substring(\$rawBranch.LastIndexOf("/") + 1) }
-                        else { \$tag = \$rawBranch }
-                        if (\$null -eq \$tag -or \$tag -eq "") { \$tag = "latest" }
+                        # 1. Giải mã key chuẩn xác bằng Byte (Tránh lỗi libcrypto)
+                        \$keyBytes = [System.Convert]::FromBase64String("${env.SSH_KEY}")
+                        [System.IO.File]::WriteAllBytes("\${env:WORKSPACE}\\ssh_key_temp", \$keyBytes)
+                        
+                        \$tag = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { "${env.GIT_BRANCH}".Split('/')[-1] }
 
-                        docker run --rm -e RAW_KEY="${env.SSH_KEY}" alpine:latest sh -c "
-                            apk add --no-cache openssh-client &&
-                            echo \\\$RAW_KEY | base64 -d > /tmp/ssh_key &&
-                            chmod 600 /tmp/ssh_key &&
-                            ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && cd ${env.WORK_DIR} && set IMAGE_TAG=\$tag && docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'
-                        "
+                        # 2. Deploy qua Docker Alpine (Dùng cách truyền file an toàn nhất)
+                        docker run --rm `
+                            -v "\${env:WORKSPACE}:/certs:ro" `
+                            alpine:latest `
+                            sh -c "apk add --no-cache openssh-client && \
+                                   cp /certs/ssh_key_temp /tmp/id_rsa && \
+                                   chmod 600 /tmp/id_rsa && \
+                                   ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
+                                   cd ${env.WORK_DIR} && \
+                                   set IMAGE_TAG=\$tag && \
+                                   docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
+                                   docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
+                        
+                        Remove-Item "ssh_key_temp" -Force
                     """
                 }
             }
@@ -45,7 +54,7 @@ pipeline {
     }
 
     post {
-        success { echo "Success: Docusaurus has been deployed to 172.16.1.122" }
-        failure { echo "Failed: Please check the console log." }
+        success { echo "Success! Docusaurus is LIVE." }
+        failure { echo "Failed. Check SSH Key or Network." }
     }
 }
