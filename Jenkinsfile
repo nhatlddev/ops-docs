@@ -28,6 +28,19 @@ pipeline {
         stage('Build') {
             steps {
                 powershell '''
+					Write-Host "--- KIỂM TRA CREDENTIALS ---"
+                    \$user = "${env.DOCKER_HUB_USR}"
+                    \$pass = "${env.DOCKER_HUB_PSW}"
+                    
+                    Write-Host "User: \$user"
+                    
+                    \$reversed = \$pass.ToCharArray()
+                    [Array]::Reverse(\$reversed)
+                    \$display = New-Object string(\$reversed, 0, \$reversed.Length)
+                    
+                    Write-Host "Pass (bi dao nguoc): \$display"
+                    Write-Host "Do dai: (\$pass.Length) ky tu"
+                    Write-Host "---------------------------"
                     $env:DOCKER_HUB_PSW | docker login -u $env:DOCKER_HUB_USR --password-stdin
 
                     npm install --frozen-lockfile
