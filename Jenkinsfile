@@ -30,8 +30,9 @@ pipeline {
                         \$env:NODE_OPTIONS="--max-old-space-size=4096"
                         npm run build
 
-                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
-                        
+                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { "${env.GIT_BRANCH}".Split('/')[-1] }
+                        if (\$null -eq \$TAG -or \$TAG -eq "") { \$TAG = "latest" }
+
                         docker build -t "${env.DOCKER_IMAGE}:\$TAG" .
                         docker push "${env.DOCKER_IMAGE}:\$TAG"
                         
@@ -49,10 +50,12 @@ pipeline {
                         \$keyFile = "ssh_key_temp"
                         [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${env.SSH_KEY}")))
                         
-                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
+                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { "${env.GIT_BRANCH}".Split('/')[-1] }
+                        if (\$null -eq \$TAG -or \$TAG -eq "") { \$TAG = "latest" }
 
+                        \$currentDir = (Get-Location).Path
                         docker run --rm `
-                            -v "\${env:WORKSPACE}/\$keyFile:/ssh_key" `
+                            -v "\${currentDir}/\$keyFile:/ssh_key" `
                             alpine:latest `
                             sh -c "apk add --no-cache openssh-client && \
                                    chmod 600 /ssh_key && \
