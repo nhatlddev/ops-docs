@@ -27,69 +27,52 @@ pipeline {
 
         stage('Build') {
             steps {
-                powershell '''
-					Write-Host "--- KIỂM TRA CREDENTIALS ---"
-                    \$user = "${env.DOCKER_HUB_USR}"
-                    \$pass = "${env.DOCKER_HUB_PSW}"
-                    
-                    Write-Host "User: \$user"
-                    
-                    \$reversed = \$pass.ToCharArray()
-                    [Array]::Reverse(\$reversed)
-                    \$display = New-Object string(\$reversed, 0, \$reversed.Length)
-                    
-                    Write-Host "Pass (bi dao nguoc): \$display"
-                    Write-Host "Do dai: (\$pass.Length) ky tu"
-                    Write-Host "---------------------------"
-                    $env:DOCKER_HUB_PSW | docker login -u $env:DOCKER_HUB_USR --password-stdin
+                powershell """
+                    \$env:DOCKER_HUB_PSW | docker login -u \$env:DOCKER_HUB_USR --password-stdin
 
                     npm install --frozen-lockfile
-                    $env:NODE_OPTIONS="--max-old-space-size=4096"
+                    \$env:NODE_OPTIONS="--max-old-space-size=4096"
                     npm run build
 
-                    $TAG = if ($env:BRANCH_NAME) { $env:BRANCH_NAME } else { if ($env:GIT_BRANCH) { $env:GIT_BRANCH.Split('/')[-1] } else { "latest" } }
+                    \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
                     
-                    docker build -t "$env:DOCKER_IMAGE`:$TAG" .
-                    docker push "$env:DOCKER_IMAGE`:$TAG"
+                    docker build -t "${env.DOCKER_IMAGE}:\$TAG" .
+                    docker push "${env.DOCKER_IMAGE}:\$TAG"
                     
                     docker logout
-                '''
+                """
             }
         }
 
         stage('Deploy') {
             steps {
-                powershell '''
-                    $keyFile = "ssh_key_temp"
-                    [System.IO.File]::WriteAllText($keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY)))
+                powershell """
+                    \$keyFile = "ssh_key_temp"
+                    [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${env.SSH_PRIVATE_KEY}")))
                     
-                    $TAG = if ($env:BRANCH_NAME) { $env:BRANCH_NAME } else { if ($env:GIT_BRANCH) { $env:GIT_BRANCH.Split('/')[-1] } else { "latest" } }
+                    \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
 
                     docker run --rm `
-                        -v "${env:WORKSPACE}/$keyFile:/ssh_key" `
+                        -v "\${env:WORKSPACE}/\$keyFile:/ssh_key" `
                         alpine:latest `
                         sh -c "apk add --no-cache openssh-client && \
                                chmod 600 /ssh_key && \
                                mkdir -p ~/.ssh && \
-                               ssh-keyscan -H $env:SSH_HOST >> ~/.ssh/known_hosts && \
-                               ssh -i /ssh_key $env:SSH_USER@$env:SSH_HOST 'echo $env:DOCKER_HUB_PSW | docker login -u $env:DOCKER_HUB_USR --password-stdin && \
-                               cd $env:WORK_DIR && \
-                               export IMAGE_TAG=$TAG && \
-                               docker-compose -f $env:COMPOSE_FILE pull ops-docs && \
-                               docker-compose -f $env:COMPOSE_FILE up -d --remove-orphans ops-docs'"
+                               ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
+                               ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'echo ${env.DOCKER_HUB_PSW} | docker login -u ${env.DOCKER_HUB_USR} --password-stdin && \
+                               cd ${env.WORK_DIR} && \
+                               export IMAGE_TAG=\$TAG && \
+                               docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
+                               docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
                     
-                    Remove-Item $keyFile -Force
-                '''
+                    Remove-Item \$keyFile -Force
+                """
             }
         }
     }
 
     post {
-        success {
-            echo "Success"
-        }
-        failure {
-            echo "Failed"
-        }
+        success { echo "Success" }
+        failure { echo "Failed" }
     }
 }
