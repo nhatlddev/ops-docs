@@ -11,7 +11,7 @@ pipeline {
         
         SSH_HOST = "172.16.1.122"
         SSH_USER = "Admin"
-        WORK_DIR = "C:\project"
+        WORK_DIR = "C:\\project"
     }
 
     tools {
