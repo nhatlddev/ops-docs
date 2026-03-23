@@ -58,11 +58,12 @@ pipeline {
                         else { \$tag = \$rawBranch }
                         if (\$null -eq \$tag -or \$tag -eq "") { \$tag = "latest" }
 
-                        \$currentDir = (Get-Location).Path
-                        \$localPath = "\${currentDir}/\$keyFile"
+                        \$localPath = (Get-Location).Path + "/\$keyFile"
+                        \$containerPath = "/ssh_key"
+                        \$volumeBind = "\${localPath}:\${containerPath}"
 
                         docker run --rm `
-                            -v "\${localPath}:/tmp/ssh_key_mount:ro" `
+                            -v "\$volumeBind" `
                             alpine:latest `
                             sh -c "apk add --no-cache openssh-client && \
                                    cp /tmp/ssh_key_mount /tmp/ssh_key && \
@@ -71,7 +72,7 @@ pipeline {
                                    ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
                                    ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
                                    cd ${env.WORK_DIR} && \
-                                   export IMAGE_TAG=\$tag && \
+                                   set IMAGE_TAG=\$tag && \
                                    docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
                                    docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
                         
