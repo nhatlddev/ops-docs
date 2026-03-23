@@ -19,25 +19,24 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Build Docusaurus') {
+        stage('Build') {
             steps {
                 powershell '''
-                    # 1. Login Docker Hub
-                    echo "$env:DOCKER_HUB_PSW" | docker login -u "$env:DOCKER_HUB_USR" --password-stdin
+                    $env:DOCKER_HUB_PSW | docker login -u $env:DOCKER_HUB_USR --password-stdin
 
                     npm install --frozen-lockfile
                     $env:NODE_OPTIONS="--max-old-space-size=4096"
                     npm run build
 
-                    $TAG = $env:BRANCH_NAME
-                    docker build -t "$env:DOCKER_IMAGE`:$TAG" .
+                    $TAG = if ($env:BRANCH_NAME) { $env:BRANCH_NAME } else { if ($env:GIT_BRANCH) { $env:GIT_BRANCH.Split('/')[-1] } else { "latest" } }
                     
+                    docker build -t "$env:DOCKER_IMAGE`:$TAG" .
                     docker push "$env:DOCKER_IMAGE`:$TAG"
                     
                     docker logout
@@ -45,14 +44,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Server') {
+        stage('Deploy') {
             steps {
                 powershell '''
-                    Write-Host "Deploying..."
                     $keyFile = "ssh_key_temp"
-                    
                     [System.IO.File]::WriteAllText($keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY)))
                     
+                    $TAG = if ($env:BRANCH_NAME) { $env:BRANCH_NAME } else { if ($env:GIT_BRANCH) { $env:GIT_BRANCH.Split('/')[-1] } else { "latest" } }
+
                     docker run --rm `
                         -v "${env:WORKSPACE}/$keyFile:/ssh_key" `
                         alpine:latest `
@@ -62,7 +61,7 @@ pipeline {
                                ssh-keyscan -H $env:SSH_HOST >> ~/.ssh/known_hosts && \
                                ssh -i /ssh_key $env:SSH_USER@$env:SSH_HOST 'echo $env:DOCKER_HUB_PSW | docker login -u $env:DOCKER_HUB_USR --password-stdin && \
                                cd $env:WORK_DIR && \
-                               export IMAGE_TAG=$env:BRANCH_NAME && \
+                               export IMAGE_TAG=$TAG && \
                                docker-compose -f $env:COMPOSE_FILE pull ops-docs && \
                                docker-compose -f $env:COMPOSE_FILE up -d --remove-orphans ops-docs'"
                     
@@ -74,10 +73,10 @@ pipeline {
 
     post {
         success {
-            echo "Docusaurus pushed."
+            echo "Success"
         }
         failure {
-            echo "Build failed."
+            echo "Failed"
         }
     }
 }
