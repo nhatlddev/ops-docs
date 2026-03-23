@@ -66,10 +66,9 @@ pipeline {
                             -v "\$volumeBind" `
                             alpine:latest `
                             sh -c "apk add --no-cache openssh-client && \
-                                   chmod 600 /ssh_key && \
                                    mkdir -p ~/.ssh && \
                                    ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
-                                   ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
+                                   ssh -i /ssh_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
                                    cd ${env.WORK_DIR} && \
                                    export IMAGE_TAG=\$tag && \
                                    docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
