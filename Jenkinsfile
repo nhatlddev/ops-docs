@@ -30,11 +30,14 @@ pipeline {
                         \$env:NODE_OPTIONS="--max-old-space-size=4096"
                         npm run build
 
-                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { "${env.GIT_BRANCH}".Split('/')[-1] }
-                        if (\$null -eq \$TAG -or \$TAG -eq "") { \$TAG = "latest" }
+                        \$rawBranch = "${env.GIT_BRANCH}"
+                        if (\$rawBranch -match "/") { \$tag = \$rawBranch.Substring(\$rawBranch.LastIndexOf("/") + 1) }
+                        else { \$tag = \$rawBranch }
+                        if (\$null -eq \$tag -or \$tag -eq "") { \$tag = "latest" }
 
-                        docker build -t "${env.DOCKER_IMAGE}:\$TAG" .
-                        docker push "${env.DOCKER_IMAGE}:\$TAG"
+                        Write-Host "Tag xac dinh duoc: \$tag"
+                        docker build -t "${env.DOCKER_IMAGE}:\$tag" .
+                        docker push "${env.DOCKER_IMAGE}:\$tag"
                         
                         docker logout
                     """
@@ -50,12 +53,17 @@ pipeline {
                         \$keyFile = "ssh_key_temp"
                         [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${env.SSH_KEY}")))
                         
-                        \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { "${env.GIT_BRANCH}".Split('/')[-1] }
-                        if (\$null -eq \$TAG -or \$TAG -eq "") { \$TAG = "latest" }
+                        \$rawBranch = "${env.GIT_BRANCH}"
+                        if (\$rawBranch -match "/") { \$tag = \$rawBranch.Substring(\$rawBranch.LastIndexOf("/") + 1) }
+                        else { \$tag = \$rawBranch }
+                        if (\$null -eq \$tag -or \$tag -eq "") { \$tag = "latest" }
 
-                        \$currentDir = (Get-Location).Path
+                        \$localPath = (Get-Location).Path + "/\$keyFile"
+                        \$containerPath = "/ssh_key"
+                        \$volumeBind = "\${localPath}:\${containerPath}"
+
                         docker run --rm `
-                            -v "\${currentDir}/\$keyFile:/ssh_key" `
+                            -v "\$volumeBind" `
                             alpine:latest `
                             sh -c "apk add --no-cache openssh-client && \
                                    chmod 600 /ssh_key && \
@@ -63,7 +71,7 @@ pipeline {
                                    ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
                                    ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
                                    cd ${env.WORK_DIR} && \
-                                   export IMAGE_TAG=\$TAG && \
+                                   export IMAGE_TAG=\$tag && \
                                    docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
                                    docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
                         
