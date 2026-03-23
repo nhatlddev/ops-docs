@@ -7,6 +7,7 @@ pipeline {
         SSH_HOST = "172.16.1.122"
         SSH_USER = "Admin"
         WORK_DIR = "C:\\project"
+        PROJECT_NAME = "ops-docs" 
     }
 
     tools {
@@ -20,20 +21,41 @@ pipeline {
             }
         }
 
-       
+        stage('Build') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
+                    powershell """
+                        docker login -u "${DOCK_USER}" -p "${DOCK_PASS}"
+
+                        npm install --frozen-lockfile
+                        \$env:NODE_OPTIONS="--max-old-space-size=4096"
+                        npm run build
+
+                        \$rawBranch = "${env.GIT_BRANCH}"
+                        if (\$rawBranch -match "/") { \$tag = \$rawBranch.Substring(\$rawBranch.LastIndexOf("/") + 1) }
+                        else { \$tag = \$rawBranch }
+                        if (\$null -eq \$tag -or \$tag -eq "") { \$tag = "latest" }
+
+                        Write-Host "Tag xac dinh duoc: \$tag"
+                        docker build -t "${env.DOCKER_IMAGE}:\$tag" .
+                        docker push "${env.DOCKER_IMAGE}:\$tag"
+                        
+                        docker logout
+                    """
+                }
+            }
+        }
 
         stage('Deploy') {
             steps {
                 withCredentials([string(credentialsId: 'ssh-private-key', variable: 'SSH_KEY'), 
                                  usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
                     powershell """
-                        # 1. Giải mã key chuẩn xác bằng Byte (Tránh lỗi libcrypto)
                         \$keyBytes = [System.Convert]::FromBase64String("${env.SSH_KEY}")
                         [System.IO.File]::WriteAllBytes("\${env:WORKSPACE}\\ssh_key_temp", \$keyBytes)
                         
                         \$tag = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { "${env.GIT_BRANCH}".Split('/')[-1] }
 
-                        # 2. Deploy qua Docker Alpine (Dùng cách truyền file an toàn nhất)
                         docker run --rm `
                             -v "\${env:WORKSPACE}:/certs:ro" `
                             alpine:latest `
@@ -43,8 +65,8 @@ pipeline {
                                    ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
                                    cd ${env.WORK_DIR} && \
                                    set IMAGE_TAG=\$tag && \
-                                   docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
-                                   docker-compose -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
+                                   docker-compose -p ${env.PROJECT_NAME} -f ${env.COMPOSE_FILE} pull ops-docs && \
+                                   docker-compose -p ${env.PROJECT_NAME} -f ${env.COMPOSE_FILE} up -d --remove-orphans ops-docs'"
                         
                         Remove-Item "ssh_key_temp" -Force
                     """
@@ -54,7 +76,7 @@ pipeline {
     }
 
     post {
-        success { echo "Success! Docusaurus is LIVE." }
-        failure { echo "Failed. Check SSH Key or Network." }
+        success { echo "Success! Docusaurus is LIVE and isolated." }
+        failure { echo "Failed. Check logs." }
     }
 }
