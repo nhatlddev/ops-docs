@@ -24,7 +24,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
                     powershell """
-                        echo "\$env:DOCK_PASS" | docker login -u "\$env:DOCK_USER" --password-stdin
+                        docker login -u "${DOCK_USER}" -p "${DOCK_PASS}"
 
                         npm install --frozen-lockfile
                         \$env:NODE_OPTIONS="--max-old-space-size=4096"
@@ -47,7 +47,7 @@ pipeline {
                                  usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCK_PASS', usernameVariable: 'DOCK_USER')]) {
                     powershell """
                         \$keyFile = "ssh_key_temp"
-                        [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("\$env:SSH_KEY")))
+                        [System.IO.File]::WriteAllText(\$keyFile, [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${env.SSH_KEY}")))
                         
                         \$TAG = if ("${env.BRANCH_NAME}") { "${env.BRANCH_NAME}" } else { if ("${env.GIT_BRANCH}") { "${env.GIT_BRANCH}".Split('/')[-1] } else { "latest" } }
 
@@ -58,7 +58,7 @@ pipeline {
                                    chmod 600 /ssh_key && \
                                    mkdir -p ~/.ssh && \
                                    ssh-keyscan -H ${env.SSH_HOST} >> ~/.ssh/known_hosts && \
-                                   ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'echo \$DOCK_PASS | docker login -u \$DOCK_USER --password-stdin && \
+                                   ssh -i /ssh_key ${env.SSH_USER}@${env.SSH_HOST} 'docker login -u ${DOCK_USER} -p ${DOCK_PASS} && \
                                    cd ${env.WORK_DIR} && \
                                    export IMAGE_TAG=\$TAG && \
                                    docker-compose -f ${env.COMPOSE_FILE} pull ops-docs && \
